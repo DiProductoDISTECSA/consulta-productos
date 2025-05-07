@@ -1,5 +1,3 @@
-# Consulta-Productos
-
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -32,7 +30,7 @@
     }
 
     h1 {
-      color: #1976d2;
+      color: #f7a600; /* Título en color HEX #f7a600 */
       margin-bottom: 20px;
     }
 
@@ -47,7 +45,7 @@
     }
 
     input[type="text"]:focus {
-      border-color: #1976d2;
+      border-color: #f7a600; /* Color del borde cuando se enfoca */
       outline: none;
     }
 
@@ -58,7 +56,7 @@
 
     .info label {
       font-weight: bold;
-      color: #555;
+      color: #f7a600; /* Títulos en color HEX #f7a600 */
       display: block;
       margin-top: 10px;
     }
