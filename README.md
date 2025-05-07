@@ -78,18 +78,6 @@
       font-size: 16px;
       color: #333;
     }
-
-    /* Estilo para la imagen que se añadirá */
-    .image-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .image-container img {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 8px;
-    }
   </style>
 </head>
 <body>
@@ -110,11 +98,6 @@
 
       <label>PVD:</label>
       <span id="pvd">—</span>
-    </div>
-
-    <!-- Imagen añadida al final del formulario -->
-    <div class="image-container">
-      <img src="Logos-iso-distecsa-aplicaciones%20(3).png" alt="Logo ISO DISTEC SA">
     </div>
   </div>
 
