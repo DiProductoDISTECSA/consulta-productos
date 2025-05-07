@@ -1,4 +1,5 @@
 # Consulta-Productos
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -63,7 +64,7 @@
   <script>
     const productos = [];
 
-    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios%20.csv';
+    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
 
     function cargarProductos() {
       Papa.parse(csvUrl, {
@@ -75,8 +76,8 @@
             return {
               CODIGO: p.CODIGO?.trim(),
               DESCRIPCION: p.DESCRIPCION?.trim(),
-              PVP: parseFloat(p.PVP?.replace(/"/g, '').replace(/,/g, '').trim()) || 0,
-              PVD: parseFloat(p.PVD?.replace(/"/g, '').replace(/,/g, '').trim()) || 0
+              PVP: limpiarNumero(p.PVP),
+              PVD: limpiarNumero(p.PVD)
             };
           });
 
@@ -97,13 +98,18 @@
       });
     }
 
+    function limpiarNumero(valor) {
+      if (!valor) return 0;
+      return parseFloat(valor.replace(/"/g, '').replace(/,/g, '').trim()) || 0;
+    }
+
     function mostrarDetalles(codigo) {
-      const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());
+      const producto = productos.find(p => p.CODIGO === codigo);
 
       if (producto) {
         $('#descripcion').text(producto.DESCRIPCION || '—');
-        $('#pvp').text(producto.PVP.toLocaleString('es-CO', {minimumFractionDigits: 2}));
-        $('#pvd').text(producto.PVD.toLocaleString('es-CO', {minimumFractionDigits: 2}));
+        $('#pvp').text(producto.PVP.toLocaleString('es-CO', { minimumFractionDigits: 0 }));
+        $('#pvd').text(producto.PVD.toLocaleString('es-CO', { minimumFractionDigits: 0 }));
       } else {
         $('#descripcion').text('No encontrado');
         $('#pvp').text('—');
