@@ -10,7 +10,7 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        input, button { padding: 10px; margin: 10px 0; width: 100%; font-size: 16px; }
+        input { padding: 10px; margin: 10px 0; width: 100%; font-size: 16px; }
         .result { margin-top: 20px; }
     </style>
 </head>
@@ -20,8 +20,6 @@
         <label for="codigo">Escribe o selecciona un Código</label>
         <input list="lista-codigos" id="codigo" name="codigo" placeholder="Ej. #CENIT-3-1013230BK">
         <datalist id="lista-codigos"></datalist>
-
-        <button onclick="getDetails()">Consultar</button>
 
         <div class="result" id="result"></div>
     </div>
@@ -75,14 +73,7 @@
             });
         }
 
-        function getDetails() {
-            const codigo = $('#codigo').val().trim();
-            if (!codigo) {
-                alert("Por favor, ingresa un código.");
-                return;
-            }
-
-            // Buscar el producto en los datos cargados
+        function mostrarDetalles(codigo) {
             const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());  // Eliminar espacios adicionales
             console.log("Producto encontrado: ", producto); // Verifica si el producto es encontrado
 
@@ -97,6 +88,16 @@
                 $('#result').html('<p>No se encontraron detalles para este código.</p>');
             }
         }
+
+        // Detectar cambios en el input y mostrar detalles automáticamente
+        $('#codigo').on('input', function() {
+            const codigo = $(this).val().trim();
+            if (codigo) {
+                mostrarDetalles(codigo);
+            } else {
+                $('#result').empty();  // Limpiar el área de resultados si no hay código
+            }
+        });
 
         // Cargar productos cuando la página esté lista
         $(document).ready(cargarProductos);
