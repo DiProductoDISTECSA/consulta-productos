@@ -30,6 +30,7 @@
     h1 {
       color: #1c205c; /* Títulos en color HEX #1c205c */
       font-weight: 600;
+      margin-bottom: 10px;
     }
 
     input {
