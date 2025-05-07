@@ -1,4 +1,3 @@
-
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -8,81 +7,64 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
       padding: 20px;
-      margin: 0;
     }
-
     .container {
       max-width: 600px;
-      margin: auto;
+      margin: 0 auto;
       background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    .container img {
-      max-width: 100%;
-      margin-bottom: 20px;
-      border-radius: 8px;
-    }
-
-    h1 {
-      color: #f7a600 !important; /* Título en color HEX #f7a600 */
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
+    input {
+      padding: 10px;
+      margin: 10px 0;
       width: 100%;
-      padding: 12px;
       font-size: 16px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      transition: border-color 0.3s ease;
     }
-
-    input[type="text"]:focus {
-      border-color: #f7a600 !important; /* Color del borde cuando se enfoca */
-      outline: none;
+    .suggestions {
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      background: white;
+      position: absolute;
+      width: calc(100% - 42px);
+      z-index: 1000;
     }
-
+    .suggestions div {
+      padding: 10px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background: #f0f0f0;
+    }
     .info {
-      text-align: left;
       margin-top: 20px;
     }
-
     .info label {
       font-weight: bold;
-      color: #f7a600 !important; /* Títulos en color HEX #f7a600 */
       display: block;
       margin-top: 10px;
     }
-
     .info span {
       display: block;
-      font-size: 17px;
-      color: #222;
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 15px;
-      }
+      font-size: 16px;
+      color: #333;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Imagen decorativa o logo -->
-    <img src="https://via.placeholder.com/600x150?text=Logo+Empresa" alt="Imagen" />
-
     <h1>Consulta de Producto</h1>
-
-    <input type="text" id="codigo" placeholder="Ingresa el código (Ej. #CENIT-3-1013230BK)" autocomplete="off">
+    <label for="codigo">Escribe o selecciona un Código</label>
+    <div style="position: relative;">
+      <input id="codigo" name="codigo" autocomplete="off" placeholder="Ej. #CENIT-3-1013230BK">
+      <div class="suggestions" id="sugerencias"></div>
+    </div>
 
     <div class="info">
       <label>Descripción:</label>
@@ -107,28 +89,31 @@
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          const dataLimpia = results.data.map(p => ({
-            CODIGO: p.CODIGO?.trim(),
-            DESCRIPCION: p.DESCRIPCION?.trim(),
-            PVP: parseFloat(p.PVP?.replace(/,/g, '').trim()) || 0,
-            PVD: parseFloat(p.PVD?.replace(/,/g, '').trim()) || 0
-          }));
+          const dataLimpia = results.data.map(p => {
+            return {
+              CODIGO: p.CODIGO?.trim(),
+              DESCRIPCION: p.DESCRIPCION?.trim(),
+              PVP: parseFloat(p.PVP?.replace(/"/g, '').replace(/,/g, '').trim()) || 0,
+              PVD: parseFloat(p.PVD?.replace(/"/g, '').replace(/,/g, '').trim()) || 0
+            };
+          });
 
           productos.push(...dataLimpia);
         },
-        error: function(err) {
-          alert("Error al cargar los datos del CSV.");
-          console.error(err);
+        error: function(error) {
+          console.error("Error al cargar el CSV:", error);
+          alert("Error al cargar los datos del archivo CSV.");
         }
       });
     }
 
     function mostrarDetalles(codigo) {
-      const producto = productos.find(p => p.CODIGO === codigo);
+      const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());
+
       if (producto) {
         $('#descripcion').text(producto.DESCRIPCION || '—');
-        $('#pvp').text(producto.PVP.toLocaleString('es-CO', { minimumFractionDigits: 2 }));
-        $('#pvd').text(producto.PVD.toLocaleString('es-CO', { minimumFractionDigits: 2 }));
+        $('#pvp').text(producto.PVP.toLocaleString('es-CO', {minimumFractionDigits: 2}));
+        $('#pvd').text(producto.PVD.toLocaleString('es-CO', {minimumFractionDigits: 2}));
       } else {
         $('#descripcion').text('No encontrado');
         $('#pvp').text('—');
@@ -136,17 +121,37 @@
       }
     }
 
-    $('#codigo').on('input', function () {
-      const codigo = $(this).val().trim();
-      if (codigo) mostrarDetalles(codigo);
-      else {
-        $('#descripcion').text('—');
-        $('#pvp').text('—');
-        $('#pvd').text('—');
-      }
-    });
+    $(document).ready(function() {
+      cargarProductos();
 
-    $(document).ready(cargarProductos);
+      $('#codigo').on('input', function () {
+        const input = $(this).val().toLowerCase();
+        const sugerencias = productos
+          .filter(p => p.CODIGO && p.CODIGO.toLowerCase().includes(input))
+          .slice(0, 10);
+
+        const sugerenciasHTML = sugerencias.map(p => `<div data-codigo="${p.CODIGO}">${p.CODIGO}</div>`).join('');
+        if (sugerencias.length > 0 && input.length > 0) {
+          $('#sugerencias').html(sugerenciasHTML).show();
+        } else {
+          $('#sugerencias').hide();
+        }
+      });
+
+      $('#sugerencias').on('click', 'div', function () {
+        const codigo = $(this).data('codigo');
+        $('#codigo').val(codigo);
+        $('#sugerencias').hide();
+        mostrarDetalles(codigo);
+      });
+
+      $(document).on('click', function (e) {
+        if (!$(e.target).closest('#codigo, #sugerencias').length) {
+          $('#sugerencias').hide();
+        }
+      });
+    });
   </script>
 </body>
 </html>
+
