@@ -64,7 +64,7 @@
   <script>
     const productos = [];
 
-    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
+    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/refs/heads/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios%20.csv';
 
     function cargarProductos() {
       Papa.parse(csvUrl, {
