@@ -64,7 +64,7 @@
   <script>
     const productos = [];
 
-    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
+    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios%20.csv';
 
     function cargarProductos() {
       Papa.parse(csvUrl, {
@@ -72,14 +72,12 @@
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          const dataLimpia = results.data.map(p => {
-            return {
-              CODIGO: p.CODIGO?.trim(),
-              DESCRIPCION: p.DESCRIPCION?.trim(),
-              PVP: limpiarNumero(p.PVP),
-              PVD: limpiarNumero(p.PVD)
-            };
-          });
+          const dataLimpia = results.data.map(p => ({
+            CODIGO: p['CODIGO']?.trim(),
+            DESCRIPCION: p['DESCRIPCION']?.trim(),
+            PVP: parseFloat(p['PVP']?.replace(/"/g, '').replace(/,/g, '').trim()) || 0,
+            PVD: parseFloat(p['PVD']?.replace(/"/g, '').replace(/,/g, '').trim()) || 0
+          }));
 
           productos.push(...dataLimpia);
 
@@ -98,18 +96,13 @@
       });
     }
 
-    function limpiarNumero(valor) {
-      if (!valor) return 0;
-      return parseFloat(valor.replace(/"/g, '').replace(/,/g, '').trim()) || 0;
-    }
-
     function mostrarDetalles(codigo) {
-      const producto = productos.find(p => p.CODIGO === codigo);
+      const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());
 
       if (producto) {
         $('#descripcion').text(producto.DESCRIPCION || '—');
-        $('#pvp').text(producto.PVP.toLocaleString('es-CO', { minimumFractionDigits: 0 }));
-        $('#pvd').text(producto.PVD.toLocaleString('es-CO', { minimumFractionDigits: 0 }));
+        $('#pvp').text(producto.PVP.toLocaleString('es-CO', {minimumFractionDigits: 2}));
+        $('#pvd').text(producto.PVD.toLocaleString('es-CO', {minimumFractionDigits: 2}));
       } else {
         $('#descripcion').text('No encontrado');
         $('#pvp').text('—');
