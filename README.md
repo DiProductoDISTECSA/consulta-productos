@@ -1,5 +1,4 @@
 # Consulta-Productos
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -30,6 +29,7 @@
     <script>
         const productos = [];
 
+        // 🔁 Enlace RAW corregido al archivo CSV en GitHub
         const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
 
         function cargarProductos() {
@@ -80,4 +80,3 @@
     </script>
 </body>
 </html>
-
