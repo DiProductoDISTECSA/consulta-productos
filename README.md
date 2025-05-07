@@ -1,5 +1,5 @@
 # Consulta-Productos
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -27,6 +27,23 @@
       width: 100%;
       font-size: 16px;
     }
+    .suggestions {
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      background: white;
+      position: absolute;
+      width: calc(100% - 42px);
+      z-index: 1000;
+    }
+    .suggestions div {
+      padding: 10px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background: #f0f0f0;
+    }
     .info {
       margin-top: 20px;
     }
@@ -46,8 +63,10 @@
   <div class="container">
     <h1>Consulta de Producto</h1>
     <label for="codigo">Escribe o selecciona un Código</label>
-    <input list="lista-codigos" id="codigo" name="codigo" placeholder="Ej. #CENIT-3-1013230BK">
-    <datalist id="lista-codigos"></datalist>
+    <div style="position: relative;">
+      <input id="codigo" name="codigo" autocomplete="off" placeholder="Ej. #CENIT-3-1013230BK">
+      <div class="suggestions" id="sugerencias"></div>
+    </div>
 
     <div class="info">
       <label>Descripción:</label>
@@ -64,7 +83,7 @@
   <script>
     const productos = [];
 
-    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios%20.csv';
+    const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/refs/heads/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios%20.csv';
 
     function cargarProductos() {
       Papa.parse(csvUrl, {
@@ -72,22 +91,16 @@
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          const dataLimpia = results.data.map(p => ({
-            CODIGO: p['CODIGO']?.trim(),
-            DESCRIPCION: p['DESCRIPCION']?.trim(),
-            PVP: parseFloat(p['PVP']?.replace(/"/g, '').replace(/,/g, '').trim()) || 0,
-            PVD: parseFloat(p['PVD']?.replace(/"/g, '').replace(/,/g, '').trim()) || 0
-          }));
+          const dataLimpia = results.data.map(p => {
+            return {
+              CODIGO: p.CODIGO?.trim(),
+              DESCRIPCION: p.DESCRIPCION?.trim(),
+              PVP: parseFloat(p.PVP?.replace(/"/g, '').replace(/,/g, '').trim()) || 0,
+              PVD: parseFloat(p.PVD?.replace(/"/g, '').replace(/,/g, '').trim()) || 0
+            };
+          });
 
           productos.push(...dataLimpia);
-
-          let options = '';
-          productos.forEach(p => {
-            if (p.CODIGO) {
-              options += `<option value="${p.CODIGO}"></option>`;
-            }
-          });
-          $('#lista-codigos').html(options);
         },
         error: function(error) {
           console.error("Error al cargar el CSV:", error);
@@ -110,18 +123,37 @@
       }
     }
 
-    $('#codigo').on('input', function () {
-      const codigo = $(this).val().trim();
-      if (codigo) {
-        mostrarDetalles(codigo);
-      } else {
-        $('#descripcion').text('—');
-        $('#pvp').text('—');
-        $('#pvd').text('—');
-      }
-    });
+    $(document).ready(function() {
+      cargarProductos();
 
-    $(document).ready(cargarProductos);
+      $('#codigo').on('input', function () {
+        const input = $(this).val().toLowerCase();
+        const sugerencias = productos
+          .filter(p => p.CODIGO && p.CODIGO.toLowerCase().includes(input))
+          .slice(0, 10);
+
+        const sugerenciasHTML = sugerencias.map(p => `<div data-codigo="${p.CODIGO}">${p.CODIGO}</div>`).join('');
+        if (sugerencias.length > 0 && input.length > 0) {
+          $('#sugerencias').html(sugerenciasHTML).show();
+        } else {
+          $('#sugerencias').hide();
+        }
+      });
+
+      $('#sugerencias').on('click', 'div', function () {
+        const codigo = $(this).data('codigo');
+        $('#codigo').val(codigo);
+        $('#sugerencias').hide();
+        mostrarDetalles(codigo);
+      });
+
+      $(document).on('click', function (e) {
+        if (!$(e.target).closest('#codigo, #sugerencias').length) {
+          $('#sugerencias').hide();
+        }
+      });
+    });
   </script>
 </body>
 </html>
+
