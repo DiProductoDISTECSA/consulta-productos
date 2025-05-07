@@ -8,10 +8,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         input { padding: 10px; margin: 10px 0; width: 100%; font-size: 16px; }
-        .result { margin-top: 20px; }
+        .info { margin-top: 20px; }
+        .info label { font-weight: bold; display: block; margin-top: 10px; }
+        .info span { display: block; font-size: 16px; color: #333; }
     </style>
 </head>
 <body>
@@ -21,13 +23,21 @@
         <input list="lista-codigos" id="codigo" name="codigo" placeholder="Ej. #CENIT-3-1013230BK">
         <datalist id="lista-codigos"></datalist>
 
-        <div class="result" id="result"></div>
+        <div class="info">
+            <label>Descripción:</label>
+            <span id="descripcion">—</span>
+
+            <label>PVP:</label>
+            <span id="pvp">—</span>
+
+            <label>PVD:</label>
+            <span id="pvd">—</span>
+        </div>
     </div>
 
     <script>
         const productos = [];
 
-        // URL del archivo CSV en GitHub (Formato RAW)
         const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
 
         function cargarProductos() {
@@ -37,34 +47,20 @@
                 skipEmptyLines: true,
                 dynamicTyping: false,
                 complete: function(results) {
-                    // Mostrar los datos cargados en consola para depuración
-                    console.log("Datos cargados:", results.data);
+                    results.data.forEach(p => {
+                        if (p.PVP) p.PVP = parseFloat(p.PVP.replace(/,/g, '').replace(/"/g, ''));
+                        if (p.PVD) p.PVD = parseFloat(p.PVD.replace(/,/g, '').replace(/"/g, ''));
+                    });
 
-                    // Verifica si los datos son válidos
-                    if (results.data && results.data.length > 0) {
-                        // Limpiar los precios, quitando las comas
-                        results.data.forEach(p => {
-                            if (p.PVP) {
-                                p.PVP = parseFloat(p.PVP.replace(/,/g, ''));  // Eliminar comas y convertir a número
-                            }
-                            if (p.PVD) {
-                                p.PVD = parseFloat(p.PVD.replace(/,/g, ''));  // Eliminar comas y convertir a número
-                            }
-                        });
+                    productos.push(...results.data);
 
-                        productos.push(...results.data);
-
-                        let options = '';
-                        productos.forEach(p => {
-                            console.log(`Producto cargado: ${JSON.stringify(p)}`); // Verifica qué datos están siendo cargados
-                            if (p.CODIGO) {
-                                options += `<option value="${p.CODIGO}"></option>`;
-                            }
-                        });
-                        $('#lista-codigos').html(options);
-                    } else {
-                        alert("No se encontraron datos válidos en el archivo CSV.");
-                    }
+                    let options = '';
+                    productos.forEach(p => {
+                        if (p.CODIGO) {
+                            options += `<option value="${p.CODIGO.trim()}"></option>`;
+                        }
+                    });
+                    $('#lista-codigos').html(options);
                 },
                 error: function(error) {
                     console.error("Error al cargar el CSV:", error);
@@ -74,32 +70,31 @@
         }
 
         function mostrarDetalles(codigo) {
-            const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());  // Eliminar espacios adicionales
-            console.log("Producto encontrado: ", producto); // Verifica si el producto es encontrado
+            const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());
 
             if (producto) {
-                $('#result').html(`
-                    <h2>Detalles del Producto</h2>
-                    <p><strong>Descripción:</strong> ${producto.DESCRIPCION}</p>
-                    <p><strong>PVP:</strong> ${producto.PVP.toFixed(2)}</p> <!-- Mostrar PVP con dos decimales -->
-                    <p><strong>PVD:</strong> ${producto.PVD.toFixed(2)}</p> <!-- Mostrar PVD con dos decimales -->
-                `);
+                $('#descripcion').text(producto.DESCRIPCION || '—');
+                $('#pvp').text(producto.PVP ? producto.PVP.toFixed(2) : '—');
+                $('#pvd').text(producto.PVD ? producto.PVD.toFixed(2) : '—');
             } else {
-                $('#result').html('<p>No se encontraron detalles para este código.</p>');
+                $('#descripcion').text('No encontrado');
+                $('#pvp').text('—');
+                $('#pvd').text('—');
             }
         }
 
-        // Detectar cambios en el input y mostrar detalles automáticamente
-        $('#codigo').on('input', function() {
+        // Actualizar campos automáticamente al escribir
+        $('#codigo').on('input', function () {
             const codigo = $(this).val().trim();
             if (codigo) {
                 mostrarDetalles(codigo);
             } else {
-                $('#result').empty();  // Limpiar el área de resultados si no hay código
+                $('#descripcion').text('—');
+                $('#pvp').text('—');
+                $('#pvd').text('—');
             }
         });
 
-        // Cargar productos cuando la página esté lista
         $(document).ready(cargarProductos);
     </script>
 </body>
