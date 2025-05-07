@@ -1,1 +1,87 @@
 # consulta-productos
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Productos</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input, button { padding: 10px; margin: 10px 0; width: 100%; font-size: 16px; }
+        .result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Producto</h1>
+        <label for="codigo">Escribe o selecciona un Código</label>
+        <input list="lista-codigos" id="codigo" name="codigo" placeholder="Ej. 00405902">
+        <datalist id="lista-codigos"></datalist>
+
+        <button onclick="getDetails()">Consultar</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const productos = [];
+
+        // URL al CSV de Google Sheets
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQiItIcLPSOWeO6AnHR8VJXN85AXOS9vwKa3GCZLd2uS6BeqvmMx4sGr4cnscgUmw/pub?output=csv';
+
+        // Cargar y parsear el CSV
+        function cargarProductos() {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true,  // Añadido para convertir los números a tipo correcto (por ejemplo, PVP y PVD).
+                complete: function(results) {
+                    productos.push(...results.data);
+
+                    // Llenar datalist con los códigos
+                    let options = '';
+                    productos.forEach(p => {
+                        if (p.codigo) {
+                            options += `<option value="${p.codigo}"></option>`;
+                        }
+                    });
+                    $('#lista-codigos').html(options);
+                },
+                error: function(error) {
+                    console.error("Error al cargar el CSV:", error);
+                    alert("Hubo un error al cargar los datos. Intenta de nuevo más tarde.");
+                }
+            });
+        }
+
+        // Función para consultar detalles del producto
+        function getDetails() {
+            const codigo = $('#codigo').val().trim();
+            if (!codigo) {
+                alert("Por favor, ingresa un código.");
+                return;
+            }
+
+            const producto = productos.find(p => p.codigo === codigo);
+            if (producto) {
+                $('#result').html(`
+                    <h2>Detalles del Producto</h2>
+                    <p><strong>Descripción:</strong> ${producto.descripcion}</p>
+                    <p><strong>PVP:</strong> ${producto.pvp}</p>
+                    <p><strong>PVD:</strong> ${producto.pvd}</p>
+                `);
+            } else {
+                $('#result').html('<p>No se encontraron detalles para este código.</p>');
+            }
+        }
+
+        // Cargar productos cuando la página esté lista
+        $(document).ready(cargarProductos);
+    </script>
+</body>
+</html>
