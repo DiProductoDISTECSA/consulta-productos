@@ -58,6 +58,7 @@
 
                         let options = '';
                         productos.forEach(p => {
+                            console.log(`Producto cargado: ${JSON.stringify(p)}`); // Verifica qué datos están siendo cargados
                             if (p.CODIGO) {
                                 options += `<option value="${p.CODIGO}"></option>`;
                             }
@@ -82,8 +83,9 @@
             }
 
             // Buscar el producto en los datos cargados
-            const producto = productos.find(p => String(p.CODIGO) === String(codigo));
-            console.log(producto); // Verifica qué producto se encuentra
+            const producto = productos.find(p => String(p.CODIGO).trim() === String(codigo).trim());  // Eliminar espacios adicionales
+            console.log("Producto encontrado: ", producto); // Verifica si el producto es encontrado
+
             if (producto) {
                 $('#result').html(`
                     <h2>Detalles del Producto</h2>
