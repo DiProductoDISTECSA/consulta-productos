@@ -30,20 +30,18 @@
     <script>
         const productos = [];
 
-        // URL al CSV de Google Sheets
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQiItIcLPSOWeO6AnHR8VJXN85AXOS9vwKa3GCZLd2uS6BeqvmMx4sGr4cnscgUmw/pub?output=csv';
 
-        // Cargar y parsear el CSV
         function cargarProductos() {
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
-                dynamicTyping: true,  // Añadido para convertir los números a tipo correcto (por ejemplo, PVP y PVD).
+                dynamicTyping: false, // ← Mantiene los códigos como string
                 complete: function(results) {
+                    console.log("Datos cargados:", results.data); // ← Para depuración
                     productos.push(...results.data);
 
-                    // Llenar datalist con los códigos
                     let options = '';
                     productos.forEach(p => {
                         if (p.codigo) {
@@ -59,7 +57,6 @@
             });
         }
 
-        // Función para consultar detalles del producto
         function getDetails() {
             const codigo = $('#codigo').val().trim();
             if (!codigo) {
@@ -67,7 +64,7 @@
                 return;
             }
 
-            const producto = productos.find(p => p.codigo === codigo);
+            const producto = productos.find(p => String(p.codigo) === String(codigo));
             if (producto) {
                 $('#result').html(`
                     <h2>Detalles del Producto</h2>
@@ -80,7 +77,6 @@
             }
         }
 
-        // Cargar productos cuando la página esté lista
         $(document).ready(cargarProductos);
     </script>
 </body>
