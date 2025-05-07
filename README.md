@@ -29,7 +29,7 @@
     <script>
         const productos = [];
 
-        // 🔁 Enlace RAW corregido al archivo CSV en GitHub
+        // URL del archivo CSV en GitHub (Formato RAW)
         const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
 
         function cargarProductos() {
@@ -39,19 +39,27 @@
                 skipEmptyLines: true,
                 dynamicTyping: false,
                 complete: function(results) {
-                    productos.push(...results.data);
+                    // Mostrar los datos cargados en consola para depuración
+                    console.log("Datos cargados:", results.data);
 
-                    let options = '';
-                    productos.forEach(p => {
-                        if (p.codigo) {
-                            options += `<option value="${p.codigo}"></option>`;
-                        }
-                    });
-                    $('#lista-codigos').html(options);
+                    // Verifica si el CSV se cargó correctamente
+                    if (results.data && results.data.length > 0) {
+                        productos.push(...results.data);
+
+                        let options = '';
+                        productos.forEach(p => {
+                            if (p.CODIGO) {
+                                options += `<option value="${p.CODIGO}"></option>`;
+                            }
+                        });
+                        $('#lista-codigos').html(options);
+                    } else {
+                        alert("No se encontraron datos válidos en el archivo CSV.");
+                    }
                 },
                 error: function(error) {
                     console.error("Error al cargar el CSV:", error);
-                    alert("Error al cargar datos.");
+                    alert("Error al cargar los datos del archivo CSV.");
                 }
             });
         }
@@ -63,19 +71,21 @@
                 return;
             }
 
-            const producto = productos.find(p => String(p.codigo) === String(codigo));
+            // Buscar el producto en los datos cargados
+            const producto = productos.find(p => String(p.CODIGO) === String(codigo));
             if (producto) {
                 $('#result').html(`
                     <h2>Detalles del Producto</h2>
-                    <p><strong>Descripción:</strong> ${producto.descripcion}</p>
-                    <p><strong>PVP:</strong> ${producto.pvp}</p>
-                    <p><strong>PVD:</strong> ${producto.pvd}</p>
+                    <p><strong>Descripción:</strong> ${producto.DESCRIPCION}</p>
+                    <p><strong>PVP:</strong> ${producto.PVP}</p>
+                    <p><strong>PVD:</strong> ${producto.PVD}</p>
                 `);
             } else {
                 $('#result').html('<p>No se encontraron detalles para este código.</p>');
             }
         }
 
+        // Cargar productos cuando la página esté lista
         $(document).ready(cargarProductos);
     </script>
 </body>
