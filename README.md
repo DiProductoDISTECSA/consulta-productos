@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -6,18 +5,12 @@
   <title>Consulta de Productos</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
-  <!-- Link para cargar la fuente Poppins desde Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
   <style>
     body {
-      font-family: 'Poppins', sans-serif; /* Cambié la fuente a Poppins */
+      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
       padding: 20px;
-      margin: 0;
     }
-
     .container {
       max-width: 600px;
       margin: 0 auto;
@@ -26,22 +19,12 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    h1 {
-      color: #1c205c; /* Títulos en color HEX #1c205c */
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
     input {
       padding: 10px;
       margin: 10px 0;
       width: 100%;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
     }
-
     .suggestions {
       border: 1px solid #ccc;
       max-height: 150px;
@@ -52,27 +35,21 @@
       width: calc(100% - 42px);
       z-index: 1000;
     }
-
     .suggestions div {
       padding: 10px;
       cursor: pointer;
     }
-
     .suggestions div:hover {
       background: #f0f0f0;
     }
-
     .info {
       margin-top: 20px;
     }
-
     .info label {
       font-weight: bold;
-      color: #1c205c; /* Títulos en color HEX #1c205c */
       display: block;
       margin-top: 10px;
     }
-
     .info span {
       display: block;
       font-size: 16px;
