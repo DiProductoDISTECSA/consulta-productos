@@ -1,4 +1,4 @@
-# consulta-productos
+# Consulta-Productos
 
 <!DOCTYPE html>
 <html lang="es">
@@ -30,16 +30,15 @@
     <script>
         const productos = [];
 
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQiItIcLPSOWeO6AnHR8VJXN85AXOS9vwKa3GCZLd2uS6BeqvmMx4sGr4cnscgUmw/pub?output=csv';
+        const csvUrl = 'https://raw.githubusercontent.com/DiProductoDISTECSA/consulta-productos/main/Copy%20of%20Lista%20de%20precios%20.xlsx%20-%20Lista%20de%20precios.csv';
 
         function cargarProductos() {
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
-                dynamicTyping: false, // ← Mantiene los códigos como string
+                dynamicTyping: false,
                 complete: function(results) {
-                    console.log("Datos cargados:", results.data); // ← Para depuración
                     productos.push(...results.data);
 
                     let options = '';
@@ -52,7 +51,7 @@
                 },
                 error: function(error) {
                     console.error("Error al cargar el CSV:", error);
-                    alert("Hubo un error al cargar los datos. Intenta de nuevo más tarde.");
+                    alert("Error al cargar datos.");
                 }
             });
         }
@@ -81,3 +80,4 @@
     </script>
 </body>
 </html>
+
